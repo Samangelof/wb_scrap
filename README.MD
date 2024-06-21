@@ -26,15 +26,17 @@
 ## Использование
 
 4. Запустить скрипт:
-```bash
-python scraper.py
+    ```bash
+    python scraper.py
+    ```
 
 5. **Заключительные шаги:**
 
-```bash
-# Добавление файлов в репозиторий
-git add .
-git commit -m "Initial commit with scraper script and README"
-git branch -M main
-git remote add origin https://github.com/your-username/wildberries-scraper.git
-git push -u origin main
+    ```bash
+    # Добавление файлов в репозиторий
+    git add .
+    git commit -m "Initial commit with scraper script and README"
+    git branch -M main
+    git remote add origin https://github.com/your-username/wildberries-scraper.git
+    git push -u origin main
+    ```
