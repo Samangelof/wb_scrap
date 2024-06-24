@@ -13,6 +13,8 @@ import threading
 from categories import categories
 
 
+MAX_PAGE = 125
+
 class WildberriesScraper:
     def __init__(self, base_url, second_url):
         self.base_url = base_url
@@ -64,7 +66,7 @@ class WildberriesScraper:
     def get_all_keywords(self, page=1):
         print("Получение всех ключевых слов...")
         all_keywords = []
-        while page <= 3:  
+        while page <= MAX_PAGE:  
             print(f"Открытие страницы {page}...")
             self.open_page(f"{self.second_url}?search=&page={page}")
             time.sleep(5)
