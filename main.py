@@ -8,6 +8,58 @@ import time
 import urllib.parse
 import queue
 from categories import categories
+import threading
+
+
+class WildberriesFrequentSearchScraper:
+    def __init__(self, url):
+        self.url = url
+        self.driver = None
+
+    def setup_driver(self):
+        service = Service(ChromeDriverManager().install())
+        self.driver = webdriver.Chrome(service=service)
+
+    def open_page(self):
+        self.driver.get(self.url)
+        time.sleep(1)
+
+    def click_search_input(self):
+        search_input = self.driver.find_element(By.CSS_SELECTOR, 'input#searchInput')
+        search_input.click()
+
+    def get_frequent_searches(self):
+        frequent_searches = []
+        autocomplete_list = self.driver.find_element(By.CSS_SELECTOR, 'ul.autocomplete__list.autocomplete__list--catalog')
+        suggestion_items = autocomplete_list.find_elements(By.CSS_SELECTOR, 'li.autocomplete__item.j-suggest')
+        
+        for item in suggestion_items:
+            phrase = item.find_element(By.CSS_SELECTOR, 'span.autocomplete__phrase').text
+            frequent_searches.append(phrase)
+            
+        return frequent_searches
+
+
+    def scrape_frequent_searches(self):
+        try:
+            self.setup_driver()
+            self.open_page()
+            
+            self.click_search_input()
+            
+            time.sleep(1)
+            
+            frequent_searches = self.get_frequent_searches()
+            print("Частые запросы:")
+            for i, search in enumerate(frequent_searches, start=1):
+                print(f"{i}. {search}")
+                
+        finally:
+            self.close_driver()
+
+    def close_driver(self):
+        self.driver.quit()
+
 
 
 class WildberriesScraper:
@@ -125,6 +177,10 @@ def threaded_search():
     
     root.after(100, wait_for_keywords)
 
+def start_frequent_search_scraper():
+    scraper = WildberriesFrequentSearchScraper('https://www.wildberries.ru/')
+    threading.Thread(target=scraper.scrape_frequent_searches).start()
+
 def close_app():
     root.destroy()
     
@@ -135,7 +191,7 @@ if __name__ == "__main__":
 
     root = tk.Tk()
     root.title("Операции")
-    root.geometry("250x180")
+    root.geometry("250x230")
 
     search_button = tk.Button(
         root, 
@@ -147,6 +203,17 @@ if __name__ == "__main__":
         height=2,
         font=('Helvetica', 12, 'bold'))
     search_button.pack(pady=20)
+
+    frequent_search_button = tk.Button(
+        root, 
+        text="Частые запросы", 
+        command=start_frequent_search_scraper, 
+        bg="yellow", 
+        fg="black", 
+        width=20, 
+        height=2,
+        font=('Helvetica', 12, 'bold'))
+    frequent_search_button.pack(pady=10)
 
     close_button = tk.Button(root, text="Закрыть приложение", command=close_app, bg="red", fg="white", width=20, height=2, font=('Helvetica', 12, 'bold'))
     close_button.pack(pady=10)
