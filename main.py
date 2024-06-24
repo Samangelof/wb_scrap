@@ -7,6 +7,7 @@ from webdriver_manager.chrome import ChromeDriverManager
 import time
 import urllib.parse
 import queue
+from categories import categories
 
 
 class WildberriesScraper:
@@ -44,9 +45,11 @@ class WildberriesScraper:
             keyword = cells[0].text
             count = cells[1].text
             benefit = cells[4].text
+            category = self.get_category_name(keyword)
             if keyword in user_keywords:
-                keyword_counts[keyword] = (count, benefit)
+                keyword_counts[keyword] = (count, benefit, category)
         return keyword_counts
+
 
     def close_driver(self):
         self.driver.quit()
@@ -63,16 +66,16 @@ class WildberriesScraper:
             self.enter_keywords_on_second_page(keywords)
             self.click_search_button()
             
-            time.sleep(10)
+            time.sleep(5)
             
-            user_keywords = keywords.split()
-            keyword_counts = self.get_keyword_counts(user_keywords)
+            keyword_counts = self.get_keyword_counts(keywords)
             if keyword_counts:
                 print("Результаты поиска:")
-                for keyword, (count, benefit) in keyword_counts.items():
+                for keyword, (count, benefit, category) in keyword_counts.items():
                     print(f'Ключевое слово: "{keyword}"')
                     print(f'Количество запросов: {count}')
                     print(f'Выгода: {benefit}')
+                    print(f'Категория товара: {category}')
                     print()
             else:
                 print("По вашему запросу ничего не найдено.")
@@ -80,9 +83,17 @@ class WildberriesScraper:
         finally:
             self.close_driver()
 
+
     def generate_search_url(self, keywords):
         query = urllib.parse.urlencode({'search': keywords})
         return f"{self.base_url}?{query}"
+
+    def get_category_name(self, keyword):
+        for pattern, category in categories.items():
+            if pattern.search(keyword):
+                return category
+        return 'другое'
+
 
 def on_search():
     keywords = simpledialog.askstring("Input", "Введите ключевые слова для поиска:")
